@@ -9,12 +9,11 @@
   <!-- Planning Groups                              -->
   <!-- ============================================ -->
 
-  <!-- Arm planning group (4 DOF) -->
+  <!-- Arm planning group (4 DOF). Defined as a kinematic chain so the
+       KDL IK solver can initialise (a bare joint list is not a chain).
+       base_link -> S5_link spans the S1/S2/S3/S5 actuated joints. -->
   <group name="arm">
-    <joint name="S1_joint"/>
-    <joint name="S2_joint"/>
-    <joint name="S3_joint"/>
-    <joint name="S5_joint"/>
+    <chain base_link="base_link" tip_link="S5_link"/>
   </group>
 
   <!-- Gripper planning group -->

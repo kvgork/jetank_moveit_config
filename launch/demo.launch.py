@@ -25,6 +25,7 @@ from launch_ros.parameter_descriptions import ParameterValue
 def generate_launch_description():
     use_sim_time = LaunchConfiguration('use_sim_time')
     use_rviz = LaunchConfiguration('use_rviz')
+    hardware = LaunchConfiguration('hardware')
 
     declare_use_sim_time = DeclareLaunchArgument(
         'use_sim_time',
@@ -36,6 +37,12 @@ def generate_launch_description():
         default_value='true',
         description='Launch RViz with the MoveIt motion-planning plugin',
     )
+    declare_hardware = DeclareLaunchArgument(
+        'hardware',
+        default_value='mock',
+        description='ros2_control backend: mock (software-only, no motors) | '
+                    'serial (real servos)',
+    )
 
     pkg_jetank_moveit = get_package_share_directory('jetank_moveit_config')
     pkg_jetank_description = get_package_share_directory('jetank_description')
@@ -45,7 +52,7 @@ def generate_launch_description():
         pkg_jetank_description, 'urdf', 'jetank_ros2_control.urdf.xacro'
     )
     robot_description = ParameterValue(
-        Command(['xacro ', robot_description_file]),
+        Command(['xacro ', robot_description_file, ' hardware:=', hardware]),
         value_type=str,
     )
     robot_state_publisher = Node(
@@ -75,12 +82,14 @@ def generate_launch_description():
         launch_arguments={
             'use_sim_time': use_sim_time,
             'use_rviz': use_rviz,
+            'hardware': hardware,
         }.items(),
     )
 
     return LaunchDescription([
         declare_use_sim_time,
         declare_use_rviz,
+        declare_hardware,
         robot_state_publisher,
         static_tf,
         moveit_bringup,
