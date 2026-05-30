@@ -1,0 +1,39 @@
+# Joint limits for MoveIt2 motion planning
+# These limits supplement the URDF joint limits
+# More conservative values for safe motion planning
+
+joint_limits:
+  S1_joint:
+    has_velocity_limits: true
+    max_velocity: 1.0  # rad/s
+    has_acceleration_limits: true
+    max_acceleration: 2.0  # rad/s^2
+    has_jerk_limits: false
+
+  S2_joint:
+    has_velocity_limits: true
+    max_velocity: 1.0
+    has_acceleration_limits: true
+    max_acceleration: 2.0
+    has_jerk_limits: false
+
+  S3_joint:
+    has_velocity_limits: true
+    max_velocity: 1.0
+    has_acceleration_limits: true
+    max_acceleration: 2.0
+    has_jerk_limits: false
+
+  S5_joint:
+    has_velocity_limits: true
+    max_velocity: 1.5  # Wrist can move faster
+    has_acceleration_limits: true
+    max_acceleration: 3.0
+    has_jerk_limits: false
+
+  gripper_left_joint:
+    has_velocity_limits: true
+    max_velocity: 0.05  # m/s, slow for gripper
+    has_acceleration_limits: true
+    max_acceleration: 0.1  # m/s^2
+    has_jerk_limits: false

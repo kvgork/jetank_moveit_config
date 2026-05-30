@@ -1,0 +1,99 @@
+# OMPL Planning configuration for MoveIt2
+# Open Motion Planning Library planner settings
+
+planning_plugin: ompl_interface/OMPLPlanner
+
+# Default planner configuration
+request_adapters: >-
+  default_planner_request_adapters/AddTimeOptimalParameterization
+  default_planner_request_adapters/ResolveConstraintFrames
+  default_planner_request_adapters/FixWorkspaceBounds
+  default_planner_request_adapters/FixStartStateBounds
+  default_planner_request_adapters/FixStartStateCollision
+  default_planner_request_adapters/FixStartStatePathConstraints
+
+response_adapters: >-
+  default_planner_response_adapters/AddTimeOptimalParameterization
+  default_planner_response_adapters/ValidateSolution
+  default_planner_response_adapters/DisplayMotionPath
+
+# Planning parameters
+start_state_max_bounds_error: 0.1
+
+planner_configs:
+  # RRT-based planners (good for complex environments)
+  RRTConnect:
+    type: geometric::RRTConnect
+    range: 0.0  # Max length of motions (0 = default)
+
+  RRT:
+    type: geometric::RRT
+    range: 0.0
+    goal_bias: 0.05
+
+  # RRT* (optimal planning)
+  RRTstar:
+    type: geometric::RRTstar
+    range: 0.0
+    goal_bias: 0.05
+    delay_collision_checking: 1
+
+  # EST planner
+  EST:
+    type: geometric::EST
+    range: 0.0
+    goal_bias: 0.05
+
+  # LBKPIECE (good for kinematic chains)
+  LBKPIECE:
+    type: geometric::LBKPIECE
+    range: 0.0
+    border_fraction: 0.9
+    min_valid_path_fraction: 0.5
+
+  # KPIECE
+  KPIECE:
+    type: geometric::KPIECE
+    range: 0.0
+    goal_bias: 0.05
+    border_fraction: 0.9
+    failed_expansion_score_factor: 0.5
+    min_valid_path_fraction: 0.5
+
+  # BiTRRT (bidirectional)
+  BiTRRT:
+    type: geometric::BiTRRT
+    range: 0.0
+
+  # FMT* (Fast Marching Tree - asymptotically optimal)
+  FMT:
+    type: geometric::FMT
+    num_samples: 1000
+    radius_multiplier: 1.1
+    nearest_k: 1
+    cache_cc: 1
+    heuristics: 0
+    extended_fmt: 1
+
+# Planning group specific settings
+arm:
+  default_planner_config: RRTConnect
+  planner_configs:
+    - RRTConnect
+    - RRT
+    - RRTstar
+    - EST
+    - LBKPIECE
+    - KPIECE
+    - BiTRRT
+    - FMT
+  projection_evaluator: joints(S1_joint,S2_joint)
+  longest_valid_segment_fraction: 0.005
+
+gripper:
+  default_planner_config: RRTConnect
+  planner_configs:
+    - RRTConnect
+    - RRT
+  projection_evaluator: joints(gripper_left_joint)
+  longest_valid_segment_fraction: 0.01

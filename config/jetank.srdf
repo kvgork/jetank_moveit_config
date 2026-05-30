@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Semantic Robot Description Format (SRDF) for JeTank Robot
+  4-DOF arm (S1, S2, S3, S5) + parallel gripper
+-->
+<robot name="jetank">
+
+  <!-- ============================================ -->
+  <!-- Planning Groups                              -->
+  <!-- ============================================ -->
+
+  <!-- Arm planning group (4 DOF) -->
+  <group name="arm">
+    <joint name="S1_joint"/>
+    <joint name="S2_joint"/>
+    <joint name="S3_joint"/>
+    <joint name="S5_joint"/>
+  </group>
+
+  <!-- Gripper planning group -->
+  <group name="gripper">
+    <joint name="gripper_left_joint"/>
+    <!-- gripper_right_joint is mimic, not included -->
+  </group>
+
+  <!-- ============================================ -->
+  <!-- End Effector                                 -->
+  <!-- ============================================ -->
+
+  <end_effector name="gripper_ee" parent_link="S5_link" group="gripper" parent_group="arm"/>
+
+  <!-- ============================================ -->
+  <!-- Named Poses                                  -->
+  <!-- ============================================ -->
+
+  <!-- Arm poses -->
+  <group_state name="home" group="arm">
+    <joint name="S1_joint" value="0"/>
+    <joint name="S2_joint" value="0"/>
+    <joint name="S3_joint" value="0"/>
+    <joint name="S5_joint" value="0"/>
+  </group_state>
+
+  <group_state name="ready" group="arm">
+    <joint name="S1_joint" value="0"/>
+    <joint name="S2_joint" value="-0.785"/>  <!-- -45 degrees -->
+    <joint name="S3_joint" value="1.047"/>   <!-- 60 degrees -->
+    <joint name="S5_joint" value="0"/>
+  </group_state>
+
+  <group_state name="vertical" group="arm">
+    <joint name="S1_joint" value="0"/>
+    <joint name="S2_joint" value="-1.57"/>   <!-- -90 degrees, vertical -->
+    <joint name="S3_joint" value="0"/>
+    <joint name="S5_joint" value="0"/>
+  </group_state>
+
+  <!-- Gripper poses -->
+  <group_state name="open" group="gripper">
+    <joint name="gripper_left_joint" value="0.04"/>  <!-- fully open -->
+  </group_state>
+
+  <group_state name="closed" group="gripper">
+    <joint name="gripper_left_joint" value="0.0"/>   <!-- fully closed -->
+  </group_state>
+
+  <group_state name="half_open" group="gripper">
+    <joint name="gripper_left_joint" value="0.02"/>
+  </group_state>
+
+  <!-- ============================================ -->
+  <!-- Collision Checking Disabled                 -->
+  <!-- ============================================ -->
+
+  <!-- Adjacent links in kinematic chain -->
+  <disable_collisions link1="chassis" link2="arm_bearing_link" reason="Adjacent"/>
+  <disable_collisions link1="arm_bearing_link" link2="S1_link" reason="Adjacent"/>
+  <disable_collisions link1="S1_link" link2="S2_link" reason="Adjacent"/>
+  <disable_collisions link1="S2_link" link2="S3_link" reason="Adjacent"/>
+  <disable_collisions link1="S3_link" link2="S5_link" reason="Adjacent"/>
+  <disable_collisions link1="S5_link" link2="gripper_base_link" reason="Adjacent"/>
+  <disable_collisions link1="gripper_base_link" link2="gripper_left_link" reason="Adjacent"/>
+  <disable_collisions link1="gripper_base_link" link2="gripper_right_link" reason="Adjacent"/>
+
+  <!-- Gripper fingers -->
+  <disable_collisions link1="gripper_left_link" link2="gripper_right_link" reason="Default"/>
+
+  <!-- Virtual link for planning -->
+  <virtual_joint name="virtual_joint" type="fixed" parent_frame="world" child_link="base_footprint"/>
+
+</robot>
