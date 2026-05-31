@@ -33,3 +33,13 @@ and a trajectory goal to `/arm_controller/follow_joint_trajectory` executes
 
 > The default RViz here is the generic MoveIt config. For the JeTank-specific
 > view, use `jetank_ros_main/rviz/unified.rviz` (via `rviz.launch.py`).
+
+### `start_gazebo:=false` — attach to an existing sim
+
+```bash
+# Run move_group only, against a Gazebo already started elsewhere
+ros2 launch jetank_moveit_config moveit_sim.launch.py start_gazebo:=false
+```
+
+This is how `jetank_ros_main/sim_demo.launch.py arm:=true` folds the arm into
+the unified sim without spawning a second Gazebo.
