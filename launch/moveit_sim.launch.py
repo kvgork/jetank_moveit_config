@@ -99,9 +99,7 @@ def launch_setup(context, *args, **kwargs):
         parameters=[params, {'use_sim_time': True}],
     )
 
-    rviz_config_file = PathJoinSubstitution([
-        FindPackageShare('moveit_ros_visualization'), 'launch', 'moveit.rviz'
-    ])
+    rviz_config_file = LaunchConfiguration('rviz_config')
     rviz_node = Node(
         package='rviz2',
         executable='rviz2',
@@ -141,6 +139,12 @@ def generate_launch_description():
             'start_gazebo', default_value='true',
             description='Launch Gazebo here. Set false to run move_group only '
                         'against an already-running simulation.',
+        ),
+        DeclareLaunchArgument(
+            'rviz_config',
+            default_value=PathJoinSubstitution([
+                FindPackageShare('moveit_ros_visualization'), 'launch', 'moveit.rviz']),
+            description='RViz config to load (with MoveIt SRDF/kinematics params).',
         ),
         OpaqueFunction(function=launch_setup),
     ])
