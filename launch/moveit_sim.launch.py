@@ -143,8 +143,10 @@ def generate_launch_description():
         DeclareLaunchArgument(
             'rviz_config',
             default_value=PathJoinSubstitution([
-                FindPackageShare('moveit_ros_visualization'), 'launch', 'moveit.rviz']),
-            description='RViz config to load (with MoveIt SRDF/kinematics params).',
+                FindPackageShare('jetank_moveit_config'), 'config', 'moveit.rviz']),
+            description='RViz config to load. Defaults to the jetank config with '
+                        'RobotModel + MotionPlanning panel (the upstream '
+                        'moveit_ros_visualization moveit.rviz is bare — no displays).',
         ),
         OpaqueFunction(function=launch_setup),
     ])
