@@ -60,17 +60,20 @@
        grasp_reach: arm lowered forward — final reach position for gripper closure.
        Joint limits: S2 in [-1.57, 1.57]; S3 in [-1.57, 1.57]; S1=S5=0 for front grasp.
        S2 negative = shoulder pitches forward/down; S3 positive = elbow bends up. -->
+  <!-- Tuned 2026-06-06 against sim (S3 limit widened to +/-2.356). Lowest in-front
+       reach the arm allows: pre ~0.19 m, reach ~0.15 m above floor. Arm cannot
+       touch the floor with current URDF primitive link lengths. -->
   <group_state name="grasp_pre" group="arm">
     <joint name="S1_joint" value="0"/>
-    <joint name="S2_joint" value="-0.6"/>    <!-- ~-34 deg: shoulder pitched forward-up -->
-    <joint name="S3_joint" value="0.8"/>     <!-- ~46 deg: elbow bent, EE higher/back -->
+    <joint name="S2_joint" value="-1.0"/>    <!-- shoulder forward -->
+    <joint name="S3_joint" value="1.5"/>     <!-- elbow bent, approach height -->
     <joint name="S5_joint" value="0"/>
   </group_state>
 
   <group_state name="grasp_reach" group="arm">
     <joint name="S1_joint" value="0"/>
-    <joint name="S2_joint" value="-1.0"/>    <!-- ~-57 deg: shoulder pitched further forward -->
-    <joint name="S3_joint" value="1.2"/>     <!-- ~69 deg: elbow extended forward and down -->
+    <joint name="S2_joint" value="-1.0"/>    <!-- shoulder forward -->
+    <joint name="S3_joint" value="2.0"/>     <!-- elbow folded further down -->
     <joint name="S5_joint" value="0"/>
   </group_state>
 
