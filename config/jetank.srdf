@@ -65,15 +65,15 @@
        touch the floor with current URDF primitive link lengths. -->
   <group_state name="grasp_pre" group="arm">
     <joint name="S1_joint" value="0"/>
-    <joint name="S2_joint" value="-1.0"/>    <!-- shoulder forward -->
-    <joint name="S3_joint" value="1.5"/>     <!-- elbow bent, approach height -->
+    <joint name="S2_joint" value="0.6"/>     <!-- +S2: arm swung forward (raised approach) -->
+    <joint name="S3_joint" value="0.0"/>
     <joint name="S5_joint" value="0"/>
   </group_state>
 
   <group_state name="grasp_reach" group="arm">
     <joint name="S1_joint" value="0"/>
-    <joint name="S2_joint" value="-1.0"/>    <!-- shoulder forward -->
-    <joint name="S3_joint" value="2.0"/>     <!-- elbow folded further down -->
+    <joint name="S2_joint" value="0.6"/>     <!-- +S2: forward; elbow down for low reach -->
+    <joint name="S3_joint" value="1.0"/>
     <joint name="S5_joint" value="0"/>
   </group_state>
 
