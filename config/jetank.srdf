@@ -63,19 +63,18 @@
   <!-- Tuned 2026-06-06 against sim (S3 limit widened to +/-2.356). Lowest in-front
        reach the arm allows: pre ~0.19 m, reach ~0.15 m above floor. Arm cannot
        touch the floor with current URDF primitive link lengths. -->
+  <!-- User-set from RViz 2026-06-06: reach S2=100deg/S3=-15deg; pre = raised approach. -->
   <group_state name="grasp_pre" group="arm">
     <joint name="S1_joint" value="0"/>
-    <joint name="S2_joint" value="1.0"/>     <!-- forward, raised -->
-    <joint name="S3_joint" value="0.0"/>
+    <joint name="S2_joint" value="1.222"/>   <!-- 70 deg: raised approach -->
+    <joint name="S3_joint" value="-0.262"/>  <!-- -15 deg -->
     <joint name="S5_joint" value="0"/>
   </group_state>
 
-  <!-- grasp_reach: lowest collision-free forward pose (~0.08 m above floor).
-       Lower folds the wrist into the arm-mounted camera (S5_link<->camera_link). -->
   <group_state name="grasp_reach" group="arm">
     <joint name="S1_joint" value="0"/>
-    <joint name="S2_joint" value="1.0"/>
-    <joint name="S3_joint" value="1.0"/>
+    <joint name="S2_joint" value="1.745"/>   <!-- 100 deg -->
+    <joint name="S3_joint" value="-0.262"/>  <!-- -15 deg -->
     <joint name="S5_joint" value="0"/>
   </group_state>
 
