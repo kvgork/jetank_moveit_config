@@ -69,6 +69,7 @@ def _build_moveit_configs():
 def launch_setup(context, *args, **kwargs):
     use_rviz = LaunchConfiguration('use_rviz')
     headless = LaunchConfiguration('headless').perform(context).lower() in ('true', '1')
+    start_gazebo = LaunchConfiguration('start_gazebo').perform(context).lower() in ('true', '1')
 
     moveit_config = _build_moveit_configs()
 
@@ -98,9 +99,7 @@ def launch_setup(context, *args, **kwargs):
         parameters=[params, {'use_sim_time': True}],
     )
 
-    rviz_config_file = PathJoinSubstitution([
-        FindPackageShare('moveit_ros_visualization'), 'launch', 'moveit.rviz'
-    ])
+    rviz_config_file = LaunchConfiguration('rviz_config')
     rviz_node = Node(
         package='rviz2',
         executable='rviz2',
@@ -117,7 +116,13 @@ def launch_setup(context, *args, **kwargs):
         condition=IfCondition(use_rviz),
     )
 
-    return [gazebo, move_group_node, rviz_node]
+    # When start_gazebo is false, attach move_group to an already-running
+    # Gazebo (e.g. launched by jetank_ros_main/sim_demo.launch.py).
+    actions = []
+    if start_gazebo:
+        actions.append(gazebo)
+    actions += [move_group_node, rviz_node]
+    return actions
 
 
 def generate_launch_description():
@@ -129,6 +134,17 @@ def generate_launch_description():
         DeclareLaunchArgument(
             'headless', default_value='true',
             description='Run Gazebo headless (no GUI)',
+        ),
+        DeclareLaunchArgument(
+            'start_gazebo', default_value='true',
+            description='Launch Gazebo here. Set false to run move_group only '
+                        'against an already-running simulation.',
+        ),
+        DeclareLaunchArgument(
+            'rviz_config',
+            default_value=PathJoinSubstitution([
+                FindPackageShare('moveit_ros_visualization'), 'launch', 'moveit.rviz']),
+            description='RViz config to load (with MoveIt SRDF/kinematics params).',
         ),
         OpaqueFunction(function=launch_setup),
     ])
