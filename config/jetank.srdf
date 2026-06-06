@@ -54,6 +54,26 @@
     <joint name="S5_joint" value="0"/>
   </group_state>
 
+  <!-- Grasp preset poses: calibration starting points — TUNE IN SIM before real-robot use.
+       Target: end-effector ~15 cm in front of the chassis at low table height (~8 cm).
+       grasp_pre: arm raised slightly higher/back — approach position before descending.
+       grasp_reach: arm lowered forward — final reach position for gripper closure.
+       Joint limits: S2 in [-1.57, 1.57]; S3 in [-1.57, 1.57]; S1=S5=0 for front grasp.
+       S2 negative = shoulder pitches forward/down; S3 positive = elbow bends up. -->
+  <group_state name="grasp_pre" group="arm">
+    <joint name="S1_joint" value="0"/>
+    <joint name="S2_joint" value="-0.6"/>    <!-- ~-34 deg: shoulder pitched forward-up -->
+    <joint name="S3_joint" value="0.8"/>     <!-- ~46 deg: elbow bent, EE higher/back -->
+    <joint name="S5_joint" value="0"/>
+  </group_state>
+
+  <group_state name="grasp_reach" group="arm">
+    <joint name="S1_joint" value="0"/>
+    <joint name="S2_joint" value="-1.0"/>    <!-- ~-57 deg: shoulder pitched further forward -->
+    <joint name="S3_joint" value="1.2"/>     <!-- ~69 deg: elbow extended forward and down -->
+    <joint name="S5_joint" value="0"/>
+  </group_state>
+
   <!-- Gripper poses -->
   <group_state name="open" group="gripper">
     <joint name="gripper_left_joint" value="0.04"/>  <!-- fully open -->
