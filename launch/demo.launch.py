@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Stand-alone MoveIt2 demo for the JeTank arm.
+"""
+Stand-alone MoveIt2 demo for the JeTank arm.
 
 Brings up everything needed to plan motions in RViz on a developer
 machine: robot_state_publisher + virtual joint TF + the full

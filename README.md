@@ -31,8 +31,9 @@ Verified: with the GUI on, `move_group` comes up, `arm_controller` is active,
 and a trajectory goal to `/arm_controller/follow_joint_trajectory` executes
 (`SUCCEEDED`) and moves the arm in sim.
 
-> The default RViz here is the generic MoveIt config. For the JeTank-specific
-> view, use `jetank_ros_main/rviz/unified.rviz` (via `rviz.launch.py`).
+> The default RViz here is this package's `config/moveit.rviz` (RobotModel +
+> MotionPlanning panel). Override with `rviz_config:=...`; for the unified
+> JeTank view use `jetank_ros_main/rviz/unified.rviz` (via `rviz.launch.py`).
 
 ### `start_gazebo:=false` — attach to an existing sim
 
@@ -106,9 +107,32 @@ On the **sim path** (`moveit_sim.launch.py`) only `move_group` (+ optional RViz)
 | `use_rviz` | all | `false` (`true` in `demo`) | Launch RViz with the MoveIt plugin |
 | `headless` | `moveit_sim` | `true` | Run Gazebo server-only (no GUI) |
 | `start_gazebo` | `moveit_sim` | `true` | If `false`, run `move_group` only against an already-running Gazebo |
-| `rviz_config` | `moveit_sim` | `moveit_ros_visualization/launch/moveit.rviz` | RViz config to load |
+| `rviz_config` | `moveit_sim` | `jetank_moveit_config/config/moveit.rviz` | RViz config to load |
 
 ### Solver / pipeline
 
 - IK: `kdl_kinematics_plugin/KDLKinematicsPlugin` for the `arm` group (`config/kinematics.yaml`).
 - Planning pipeline: `ompl` (`config/ompl_planning.yaml`).
+
+## Tests
+
+| File | Imports | Asserts |
+|---|---|---|
+| `test/test_launch_import.py` | each launch module (`launch/demo.launch.py`, `launch/moveit_bringup.launch.py`, `launch/moveit_sim.launch.py`), loaded by path | (1) every module exposes a callable `generate_launch_description`; (2) calling it returns a `launch.LaunchDescription` whose declared `DeclareLaunchArgument` names match the expected set per file (`{use_sim_time, use_rviz, hardware}` for demo/bringup; `{use_rviz, headless, start_gazebo, rviz_config}` for sim) |
+
+`moveit_configs_utils` is imported lazily inside `launch_setup`, so building the
+top-level `LaunchDescription` needs no MoveIt on the path; the real-call
+assertions skip (via `pytest.skip`) when the ROS overlay / sibling share dirs
+are absent, while the import + entry-point check still runs. Wired via
+`ament_add_pytest_test` (`CMakeLists.txt`).
+
+Run:
+
+```bash
+# Direct pytest
+pixi run -- bash -c 'cd src/jetank_moveit_config && python -m pytest test/ -q'
+
+# Via colcon (also builds the package)
+colcon test --packages-select jetank_moveit_config
+colcon test-result --verbose
+```

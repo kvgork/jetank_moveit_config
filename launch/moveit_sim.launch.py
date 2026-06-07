@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""MoveIt2 motion planning + execution for the JeTank arm IN GAZEBO.
+"""
+MoveIt2 motion planning + execution for the JeTank arm IN GAZEBO.
 
 Unlike ``moveit_bringup.launch.py`` (which starts its own standalone
 ``ros2_control_node`` for mock/serial hardware), this launch runs MoveIt on
@@ -38,7 +39,7 @@ from launch_ros.substitutions import FindPackageShare
 
 
 def _build_moveit_configs():
-    """MoveItConfigs with the SAME description Gazebo uses (use_sim:=true)."""
+    """Build MoveItConfigs with the description Gazebo uses (use_sim:=true)."""
     from moveit_configs_utils import MoveItConfigsBuilder
 
     description_pkg = get_package_share_directory('jetank_description')

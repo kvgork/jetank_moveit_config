@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""MoveIt2 bringup for the JeTank arm.
+"""
+MoveIt2 bringup for the JeTank arm.
 
 Brings up everything MoveIt needs **except** the robot description
 broadcaster: ros2_control_node, the joint_state_broadcaster +
@@ -27,7 +28,8 @@ from launch_ros.substitutions import FindPackageShare
 
 
 def _build_moveit_configs(hardware='mock'):
-    """Construct the MoveItConfigs object.
+    """
+    Construct the MoveItConfigs object.
 
     Kept in a helper so we can reference the same configuration object
     from move_group and the optional RViz node. ``hardware`` selects the
@@ -73,21 +75,12 @@ def launch_setup(context, *args, **kwargs):
     moveit_config = _build_moveit_configs(hardware=hardware)
 
     # ros2_control controller manager. Mirrors the moveit_configs_utils
-    # canonical pattern exactly: robot_description dict + the controllers
-    # YAML as a PLAIN string path (so its top-level per-controller sections
-    # stay top-level and reach the controllers). The node MUST be named
-    # 'controller_manager' (spawners target it; the YAML namespaces its
-    # controller-manager params under 'controller_manager:').
-    controllers_file = os.path.join(
-        get_package_share_directory('jetank_motor_control'),
-        'config',
-        'jetank_controllers.yaml',
-    )
-    # Canonical moveit_configs_utils pattern: robot_description (passed as a
-    # parameter for determinism — the /robot_description topic has multiple
-    # publishers here) plus the controllers YAML. The node MUST be named
-    # 'controller_manager' (spawners target it; the YAML namespaces its
-    # controller-manager params under 'controller_manager:').
+    # canonical pattern exactly: robot_description dict (passed as a parameter
+    # for determinism — the /robot_description topic has multiple publishers
+    # here) + the controllers YAML as a PLAIN string path (so its top-level
+    # per-controller sections stay top-level and reach the controllers). The
+    # node MUST be named 'controller_manager' (spawners target it; the YAML
+    # namespaces its controller-manager params under 'controller_manager:').
     #
     # NOTE (controller_manager 2.54, RoboStack): joint_state_broadcaster
     # activates, but arm_controller / gripper_controller currently fail to
@@ -95,6 +88,11 @@ def launch_setup(context, *args, **kwargs):
     # time ("'joints' parameter is empty"), so trajectory execution is not yet
     # functional on this build. Planning in RViz works. See the plan's status
     # note for the open investigation.
+    controllers_file = os.path.join(
+        get_package_share_directory('jetank_motor_control'),
+        'config',
+        'jetank_controllers.yaml',
+    )
     ros2_control_node = Node(
         package='controller_manager',
         executable='ros2_control_node',
