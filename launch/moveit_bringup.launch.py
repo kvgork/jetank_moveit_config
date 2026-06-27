@@ -105,12 +105,26 @@ def launch_setup(context, *args, **kwargs):
         ],
     )
 
+    # controller_manager 2.54 loads each controller's params_file into the
+    # controller NODE, where rclcpp only matches a bare `/**` wildcard key (the
+    # controller name / `/<name>` / `/**/<name>` all fail on this build). So each
+    # controller gets its OWN param file whose params live under `/**`; a single
+    # shared file would leak every controller's params to every controller.
+    # joint_state_broadcaster needs no params (it auto-discovers joints).
+    motor_config = os.path.join(
+        get_package_share_directory('jetank_motor_control'), 'config', 'controllers')
+    controller_param_files = {
+        'arm_controller': os.path.join(motor_config, 'arm_controller.yaml'),
+        'gripper_controller': os.path.join(motor_config, 'gripper_controller.yaml'),
+    }
     spawners = [
         Node(
             package='controller_manager',
             executable='spawner',
             name=f'{controller}_spawner',
-            arguments=[controller, '--controller-manager', '/controller_manager'],
+            arguments=[controller, '--controller-manager', '/controller_manager'] +
+                      (['--param-file', controller_param_files[controller]]
+                       if controller in controller_param_files else []),
             parameters=[{'use_sim_time': use_sim_time}],
         )
         for controller in ('joint_state_broadcaster', 'arm_controller', 'gripper_controller')
