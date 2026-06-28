@@ -137,12 +137,42 @@ def launch_setup(context, *args, **kwargs):
         if xml_key in moveit_params and isinstance(moveit_params[xml_key], str):
             moveit_params[xml_key] = ParameterValue(moveit_params[xml_key], value_type=str)
 
+    # WORKAROUND (2026-06-28, robostack-staging mutex-0.9.0 skew): the standalone
+    # ros2_control_node here runs core ros2_control 2.54.0 but the controllers are
+    # 2.53.1. Across that boundary the controllers fail to register their own node
+    # names and collapse onto the `controller_manager` node, so their action
+    # servers come up at /controller_manager/<action> instead of
+    # /<controller_name>/<action>. MoveIt's SimpleControllerManager builds the
+    # client name as <controller_name>/<action_ns> (e.g.
+    # /arm_controller/follow_joint_trajectory) and finds 0 servers -> every
+    # execute aborts instantly with "Action client not connected".
+    # Remap move_group's two action clients onto the namespace where the servers
+    # actually live. NOTE: an action is 3 services + 2 topics under its base name,
+    # and rcl only remaps those concrete sub-entities (a base-name remap like
+    # `/arm_controller/follow_joint_trajectory:=...` matches nothing). So each of
+    # the 5 sub-interfaces is remapped explicitly, per action.
+    # Safe here because this file is ONLY the standalone CM path (mock/serial);
+    # the sim path uses moveit_sim.launch.py with gz_ros2_control, which
+    # namespaces controllers correctly and is untouched. Remove this whole block
+    # once a coherent ros2_control snapshot is available (see pixi.toml note).
+    def _action_remaps(client_action, server_action):
+        return [
+            (f'{client_action}/_action/{sub}', f'{server_action}/_action/{sub}')
+            for sub in ('send_goal', 'cancel_goal', 'get_result', 'feedback', 'status')
+        ]
+    moveit_execution_remaps = (
+        _action_remaps('/arm_controller/follow_joint_trajectory',
+                       '/controller_manager/follow_joint_trajectory') +
+        _action_remaps('/gripper_controller/gripper_cmd',
+                       '/controller_manager/gripper_cmd')
+    )
     move_group_node = Node(
         package='moveit_ros_move_group',
         executable='move_group',
         name='move_group',
         output='screen',
         parameters=[moveit_params, {'use_sim_time': use_sim_time}],
+        remappings=moveit_execution_remaps,
     )
 
     rviz_config_file = PathJoinSubstitution([
