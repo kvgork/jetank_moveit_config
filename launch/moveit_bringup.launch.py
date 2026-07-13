@@ -175,9 +175,7 @@ def launch_setup(context, *args, **kwargs):
         remappings=moveit_execution_remaps,
     )
 
-    rviz_config_file = PathJoinSubstitution([
-        FindPackageShare('moveit_ros_visualization'), 'launch', 'moveit.rviz'
-    ])
+    rviz_config_file = LaunchConfiguration('rviz_config')
     rviz_node = Node(
         package='rviz2',
         executable='rviz2',
@@ -220,6 +218,14 @@ def generate_launch_description():
             default_value='mock',
             description='ros2_control backend baked into the robot_description: '
                         'mock (software-only, no motors) | serial (real servos)',
+        ),
+        DeclareLaunchArgument(
+            'rviz_config',
+            default_value=PathJoinSubstitution([
+                FindPackageShare('jetank_moveit_config'), 'config', 'moveit.rviz']),
+            description='RViz config to load. Defaults to the jetank config with '
+                        'RobotModel + MotionPlanning panel (the upstream '
+                        'moveit_ros_visualization moveit.rviz is bare — no displays).',
         ),
         OpaqueFunction(function=launch_setup),
     ])
