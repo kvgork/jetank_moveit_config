@@ -33,7 +33,7 @@ _LAUNCH_FILES = [
     ('demo.launch.py', 'jetank_demo_launch',
      {'use_sim_time', 'use_rviz', 'hardware'}),
     ('moveit_bringup.launch.py', 'jetank_moveit_bringup_launch',
-     {'use_sim_time', 'use_rviz', 'hardware'}),
+     {'use_sim_time', 'use_rviz', 'hardware', 'rviz_config'}),
     ('moveit_sim.launch.py', 'jetank_moveit_sim_launch',
      {'use_rviz', 'headless', 'start_gazebo', 'rviz_config'}),
 ]
