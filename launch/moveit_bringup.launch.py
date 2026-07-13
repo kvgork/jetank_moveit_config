@@ -122,9 +122,11 @@ def launch_setup(context, *args, **kwargs):
             package='controller_manager',
             executable='spawner',
             name=f'{controller}_spawner',
-            arguments=[controller, '--controller-manager', '/controller_manager'] +
-                      (['--param-file', controller_param_files[controller]]
-                       if controller in controller_param_files else []),
+            arguments=(
+                [controller, '--controller-manager', '/controller_manager']
+                + (['--param-file', controller_param_files[controller]]
+                   if controller in controller_param_files else [])
+            ),
             parameters=[{'use_sim_time': use_sim_time}],
         )
         for controller in ('joint_state_broadcaster', 'arm_controller', 'gripper_controller')
