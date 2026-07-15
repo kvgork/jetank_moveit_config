@@ -19,7 +19,6 @@ moveit_simple_controller_manager:
       - S1_joint
       - S2_joint
       - S3_joint
-      - S5_joint
 
   gripper_controller:
     type: GripperCommand

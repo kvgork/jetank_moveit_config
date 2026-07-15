@@ -105,12 +105,28 @@ def launch_setup(context, *args, **kwargs):
         ],
     )
 
+    # controller_manager 2.54 loads each controller's params_file into the
+    # controller NODE, where rclcpp only matches a bare `/**` wildcard key (the
+    # controller name / `/<name>` / `/**/<name>` all fail on this build). So each
+    # controller gets its OWN param file whose params live under `/**`; a single
+    # shared file would leak every controller's params to every controller.
+    # joint_state_broadcaster needs no params (it auto-discovers joints).
+    motor_config = os.path.join(
+        get_package_share_directory('jetank_motor_control'), 'config', 'controllers')
+    controller_param_files = {
+        'arm_controller': os.path.join(motor_config, 'arm_controller.yaml'),
+        'gripper_controller': os.path.join(motor_config, 'gripper_controller.yaml'),
+    }
     spawners = [
         Node(
             package='controller_manager',
             executable='spawner',
             name=f'{controller}_spawner',
-            arguments=[controller, '--controller-manager', '/controller_manager'],
+            arguments=(
+                [controller, '--controller-manager', '/controller_manager']
+                + (['--param-file', controller_param_files[controller]]
+                   if controller in controller_param_files else [])
+            ),
             parameters=[{'use_sim_time': use_sim_time}],
         )
         for controller in ('joint_state_broadcaster', 'arm_controller', 'gripper_controller')
@@ -123,17 +139,45 @@ def launch_setup(context, *args, **kwargs):
         if xml_key in moveit_params and isinstance(moveit_params[xml_key], str):
             moveit_params[xml_key] = ParameterValue(moveit_params[xml_key], value_type=str)
 
+    # WORKAROUND (2026-06-28, robostack-staging mutex-0.9.0 skew): the standalone
+    # ros2_control_node here runs core ros2_control 2.54.0 but the controllers are
+    # 2.53.1. Across that boundary the controllers fail to register their own node
+    # names and collapse onto the `controller_manager` node, so their action
+    # servers come up at /controller_manager/<action> instead of
+    # /<controller_name>/<action>. MoveIt's SimpleControllerManager builds the
+    # client name as <controller_name>/<action_ns> (e.g.
+    # /arm_controller/follow_joint_trajectory) and finds 0 servers -> every
+    # execute aborts instantly with "Action client not connected".
+    # Remap move_group's two action clients onto the namespace where the servers
+    # actually live. NOTE: an action is 3 services + 2 topics under its base name,
+    # and rcl only remaps those concrete sub-entities (a base-name remap like
+    # `/arm_controller/follow_joint_trajectory:=...` matches nothing). So each of
+    # the 5 sub-interfaces is remapped explicitly, per action.
+    # Safe here because this file is ONLY the standalone CM path (mock/serial);
+    # the sim path uses moveit_sim.launch.py with gz_ros2_control, which
+    # namespaces controllers correctly and is untouched. Remove this whole block
+    # once a coherent ros2_control snapshot is available (see pixi.toml note).
+    def _action_remaps(client_action, server_action):
+        return [
+            (f'{client_action}/_action/{sub}', f'{server_action}/_action/{sub}')
+            for sub in ('send_goal', 'cancel_goal', 'get_result', 'feedback', 'status')
+        ]
+    moveit_execution_remaps = (
+        _action_remaps('/arm_controller/follow_joint_trajectory',
+                       '/controller_manager/follow_joint_trajectory') +
+        _action_remaps('/gripper_controller/gripper_cmd',
+                       '/controller_manager/gripper_cmd')
+    )
     move_group_node = Node(
         package='moveit_ros_move_group',
         executable='move_group',
         name='move_group',
         output='screen',
         parameters=[moveit_params, {'use_sim_time': use_sim_time}],
+        remappings=moveit_execution_remaps,
     )
 
-    rviz_config_file = PathJoinSubstitution([
-        FindPackageShare('moveit_ros_visualization'), 'launch', 'moveit.rviz'
-    ])
+    rviz_config_file = LaunchConfiguration('rviz_config')
     rviz_node = Node(
         package='rviz2',
         executable='rviz2',
@@ -176,6 +220,14 @@ def generate_launch_description():
             default_value='mock',
             description='ros2_control backend baked into the robot_description: '
                         'mock (software-only, no motors) | serial (real servos)',
+        ),
+        DeclareLaunchArgument(
+            'rviz_config',
+            default_value=PathJoinSubstitution([
+                FindPackageShare('jetank_moveit_config'), 'config', 'moveit.rviz']),
+            description='RViz config to load. Defaults to the jetank config with '
+                        'RobotModel + MotionPlanning panel (the upstream '
+                        'moveit_ros_visualization moveit.rviz is bare — no displays).',
         ),
         OpaqueFunction(function=launch_setup),
     ])

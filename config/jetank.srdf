@@ -9,11 +9,13 @@
   <!-- Planning Groups                              -->
   <!-- ============================================ -->
 
-  <!-- Arm planning group (4 DOF). Defined as a kinematic chain so the
+  <!-- Arm planning group (3 DOF: S1, S2, S3). Defined as a kinematic chain so the
        KDL IK solver can initialise (a bare joint list is not a chain).
-       base_link -> S5_link spans the S1/S2/S3/S5 actuated joints. -->
+       base_link -> S4_link spans the S1/S2/S3 actuated joints. S5 is intentionally
+       left out of MoveIt entirely (no camera group) — it stays a hardware interface
+       (torque-held) but is not planned or commanded. -->
   <group name="arm">
-    <chain base_link="base_link" tip_link="S5_link"/>
+    <chain base_link="base_link" tip_link="S4_link"/>
   </group>
 
   <!-- Gripper planning group -->
@@ -26,7 +28,9 @@
   <!-- End Effector                                 -->
   <!-- ============================================ -->
 
-  <end_effector name="gripper_ee" parent_link="S5_link" group="gripper" parent_group="arm"/>
+  <!-- EE parent_link = arm tip S4_link (was S5_link). Required: S5 left the arm group,
+       so S5_link is no longer in 'arm' and MoveIt rejects it as the EE parent link. -->
+  <end_effector name="gripper_ee" parent_link="S4_link" group="gripper" parent_group="arm"/>
 
   <!-- ============================================ -->
   <!-- Named Poses                                  -->
@@ -36,23 +40,17 @@
   <group_state name="home" group="arm">
     <joint name="S1_joint" value="0"/>
     <joint name="S2_joint" value="0"/>
-    <joint name="S3_joint" value="0"/>
-    <joint name="S5_joint" value="0"/>
-  </group_state>
+    <joint name="S3_joint" value="0"/>  </group_state>
 
   <group_state name="ready" group="arm">
     <joint name="S1_joint" value="0"/>
     <joint name="S2_joint" value="-0.785"/>  <!-- -45 degrees -->
-    <joint name="S3_joint" value="1.047"/>   <!-- 60 degrees -->
-    <joint name="S5_joint" value="0"/>
-  </group_state>
+    <joint name="S3_joint" value="1.047"/>   <!-- 60 degrees -->  </group_state>
 
   <group_state name="vertical" group="arm">
     <joint name="S1_joint" value="0"/>
     <joint name="S2_joint" value="-1.57"/>   <!-- -90 degrees, vertical -->
-    <joint name="S3_joint" value="0"/>
-    <joint name="S5_joint" value="0"/>
-  </group_state>
+    <joint name="S3_joint" value="0"/>  </group_state>
 
   <!-- Grasp preset poses: calibration starting points — TUNE IN SIM before real-robot use.
        Target: end-effector ~15 cm in front of the chassis at low table height (~8 cm).
@@ -67,16 +65,12 @@
   <group_state name="grasp_pre" group="arm">
     <joint name="S1_joint" value="0"/>
     <joint name="S2_joint" value="1.222"/>   <!-- 70 deg: raised approach -->
-    <joint name="S3_joint" value="-0.262"/>  <!-- -15 deg -->
-    <joint name="S5_joint" value="0"/>
-  </group_state>
+    <joint name="S3_joint" value="-0.262"/>  <!-- -15 deg -->  </group_state>
 
   <group_state name="grasp_reach" group="arm">
     <joint name="S1_joint" value="0"/>
-    <joint name="S2_joint" value="1.745"/>   <!-- 100 deg -->
-    <joint name="S3_joint" value="-0.262"/>  <!-- -15 deg -->
-    <joint name="S5_joint" value="0"/>
-  </group_state>
+    <joint name="S2_joint" value="1.8326"/>  <!-- 105 deg, matches grasp_server re-tune -->
+    <joint name="S3_joint" value="-0.262"/>  <!-- -15 deg -->  </group_state>
 
   <!-- Gripper poses -->
   <group_state name="open" group="gripper">

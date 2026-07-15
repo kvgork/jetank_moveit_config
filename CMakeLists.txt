@@ -6,14 +6,9 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif()
 
 # find dependencies
+# Config-only package (no compiled targets): the MoveIt stack is needed at
+# launch time only, declared as <exec_depend> in package.xml.
 find_package(ament_cmake REQUIRED)
-find_package(moveit_ros_planning_interface REQUIRED)
-find_package(moveit_ros_move_group REQUIRED)
-find_package(moveit_kinematics REQUIRED)
-find_package(moveit_planners_ompl REQUIRED)
-find_package(moveit_ros_visualization REQUIRED)
-find_package(moveit_servo REQUIRED)
-find_package(moveit_simple_controller_manager REQUIRED)
 
 # Install config files
 install(DIRECTORY config
