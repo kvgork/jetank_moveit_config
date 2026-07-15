@@ -69,7 +69,7 @@
 
   <group_state name="grasp_reach" group="arm">
     <joint name="S1_joint" value="0"/>
-    <joint name="S2_joint" value="1.745"/>   <!-- 100 deg -->
+    <joint name="S2_joint" value="1.8326"/>  <!-- 105 deg, matches grasp_server re-tune -->
     <joint name="S3_joint" value="-0.262"/>  <!-- -15 deg -->  </group_state>
 
   <!-- Gripper poses -->
